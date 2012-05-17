@@ -1,0 +1,12 @@
+2012-05-05 08:03:28 Error: [LogicException] Message is not found. identify: addComplete
+#0 /Users/airhead/Documents/workspace4/tube/app/Config/bootstrap.php(136): AbstractMessage::get('addComplete', 'test')
+#1 /Users/airhead/Documents/workspace4/tube/lib/Cake/Core/Configure.php(88): include('/Users/airhead/...')
+#2 /Users/airhead/Documents/workspace4/tube/lib/Cake/bootstrap.php(142): Configure::bootstrap(true)
+#3 /Users/airhead/Documents/workspace4/tube/app/webroot/index.php(77): include('/Users/airhead/...')
+#4 {main}
+2012-05-05 08:20:11 Error: [LogicException] Message is not found. identify: addComplete
+#0 /Users/airhead/Documents/workspace4/tube/app/Config/bootstrap.php(136): AbstractMessage::get('addComplete', 'test')
+#1 /Users/airhead/Documents/workspace4/tube/lib/Cake/Core/Configure.php(88): include('/Users/airhead/...')
+#2 /Users/airhead/Documents/workspace4/tube/lib/Cake/bootstrap.php(142): Configure::bootstrap(true)
+#3 /Users/airhead/Documents/workspace4/tube/app/webroot/index.php(77): include('/Users/airhead/...')
+#4 {main}
