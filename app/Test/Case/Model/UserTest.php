@@ -11,7 +11,7 @@ class UserTestCase extends CakeTestCase {
  *
  * @var array
  */
-	public $fixtures = array('app.user');
+	public $fixtures = array('app.user', 'app.group');
 
 /**
  * setUp method
@@ -34,4 +34,20 @@ class UserTestCase extends CakeTestCase {
 		parent::tearDown();
 	}
 
+/**
+ * testParentNode method
+ *
+ * @return void
+ */
+	public function testParentNode() {
+
+	}
+/**
+ * testBindNode method
+ *
+ * @return void
+ */
+	public function testBindNode() {
+
+	}
 }

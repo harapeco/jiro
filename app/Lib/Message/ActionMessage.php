@@ -26,6 +26,9 @@ class ActionMessage extends AbstractMessage {
 	const DELETE_ERROR = 'deleteError';
 	const DELETE_COMPLETE = 'deleteComplete';
 	const DATA_NOTFOUND = 'dataNotfound';
+	const AUTH_LOGIN = 'authLogin';
+	const AUTH_LOGOUT = 'authLogout';
+	const AUTH_ERROR = 'authError';
 
 	/**
 	 * Messages
@@ -50,6 +53,9 @@ class ActionMessage extends AbstractMessage {
 		self::DELETE_LINK => '',
 		self::DELETE_ERROR => 'The %s cound not be deleted. Please, try again.',
 		self::DELETE_COMPLETE => 'The %s has been deleted.',
-		self::DATA_NOTFOUND => 'Invalid %s'
+		self::DATA_NOTFOUND => 'Invalid %s',
+		self::AUTH_LOGIN => 'You are logged in.',
+		self::AUTH_LOGOUT => 'Good-Bye.',
+		self::AUTH_ERROR => 'Invalid username or password. Please, try again.',
 	);
 }

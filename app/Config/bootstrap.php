@@ -133,3 +133,7 @@ Cache::config('default', array('engine' => 'File'));
 App::import('File', 'MessageInterface', NULL, array(APP.'Lib'.DS.'Message'.DS), 'MessageInterface.php');
 App::import('File', 'AbstractMessage', NULL, array(APP.'Lib'.DS.'Message'.DS), 'AbstractMessage.php');
 App::import('File', 'ActionMessage', NULL, array(APP.'Lib'.DS.'Message'.DS), 'ActionMessage.php');
+CakePlugin::load('AclExtras');
+CakePlugin::load('Acl', array('bootstrap' => true));
+Configure::write('acl.aro.role.model', 'Group');
+Configure::write('acl.aro.role.foreign_key', 'group_id');

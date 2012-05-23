@@ -1,25 +1,4 @@
 <?php
-/**
- * Application level Controller
- *
- * This file is application-wide controller file. You can put all
- * application-wide controller-related methods here.
- *
- * PHP 5
- *
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright 2005-2012, Cake Software Foundation, Inc. (http://cakefoundation.org)
- *
- * Licensed under The MIT License
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright     Copyright 2005-2012, Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
- * @package       app.Controller
- * @since         CakePHP(tm) v 0.2.9
- * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
- */
-
 App::uses('Controller', 'Controller');
 
 /**
@@ -30,9 +9,50 @@ App::uses('Controller', 'Controller');
  *
  * @package app.Controller
  * @author harapeco
- * @link http://book.cakephp.org/2.0/en/controllers.html#the-app-controller
  */
 class AppController extends Controller {
+
+	/**
+	 * Use components
+	 *
+	 * @var array
+	 * @access public
+	 */
+	public $components = array(
+		'Acl',
+		'Auth' => array(
+			'authorize' => array(
+				'Actions' => array('actionPath' => 'controllers')
+			)
+		),
+		'Session',
+		'Security'
+	);
+	/**
+	 * Use helpers
+	 *
+	 * @var array
+	 * @access public
+	 */
+	public $helpers = array('Html', 'Form', 'Session');
+
+	/**
+	 * Before action callback
+	 *
+	 * @return void
+	 * @see Controller::beforeFilter()
+	 * @access public
+	 */
+	public function beforeFilter() {
+		parent::beforeFilter();
+		// Configure AuthComponent
+		$this->Auth->loginAction = array('controller' => 'users', 'action' => 'login');
+		$this->Auth->logoutRedirect = array('controller' => 'users', 'action' => 'login');
+		$this->Auth->loginRedirect = array('controller' => 'users', 'action' => 'add');
+		//$this->Auth->actionPath = 'controllers/';
+		$this->Auth->allow('display');
+	}
+
 	/**
 	 * index method
 	 *
@@ -54,6 +74,7 @@ class AppController extends Controller {
 	 */
 	public function view($id = null) {
 		$this->{$this->uses[0]}->id = $id;
+		// Invalid id.
 		if (!$this->{$this->uses[0]}->exists())
 			throw new NotFoundException($this->_getMessage(ActionMessage::DATA_NOTFOUND));
 		$this->set(strtolower($this->uses[0]), $this->{$this->uses[0]}->read(null, $id));
@@ -68,13 +89,59 @@ class AppController extends Controller {
 	public function add() {
 		if ($this->request->is('post')) {
 			$this->{$this->uses[0]}->create();
-			if ($this->{$this->uses[0]}->save($this->request->data)) {
-				$this->Session->setFlash($this->_getMessage(ActionMessage::ADD_COMPLETE));
-				$this->redirect(array('action' => 'index'));
-			} else {
-				$this->Session->setFlash($this->_getMessage(ActionMessage::ADD_ERROR));
-			}
+			// Insert data
+			if ($this->{$this->uses[0]}->save($this->request->data))
+				$this->_redirectWithFlash(null, ActionMessage::ADD_COMPLETE);
+			else
+				$this->_setFlash(ActionMessage::ADD_ERROR);
 		}
+	}
+
+	/**
+	 * edit method
+	 *
+	 * @param string $id
+	 * @return void
+	 * @throws NotFoundException
+	 * @access public
+	 */
+	public function edit($id = null) {
+		$this->{$this->uses[0]}->id = $id;
+		// Invalid id.
+		if (!$this->{$this->uses[0]}->exists())
+			throw new NotFoundException($this->_getMessage(ActionMessage::DATA_NOTFOUND));
+		// Update data.
+		if ($this->request->is('post') || $this->request->is('put')) {
+			if ($this->{$this->uses[0]}->save($this->request->data))
+				$this->_redirectWithFlash(null, ActionMessage::EDIT_COMPLETE);
+			else
+				$this->_setFlash(ActionMessage::EDIT_ERROR);
+		} else {
+			$this->request->data = $this->{$this->uses[0]}->read(null, $id);
+		}
+	}
+
+	/**
+	 * delete method
+	 *
+	 * @param string $id
+	 * @return void
+	 * @throws MethodNotAllowedException
+	 * @access public
+	 */
+	public function delete($id = null) {
+		// Invalid http method.
+		if (!$this->request->is('post'))
+			throw new MethodNotAllowedException();
+		$this->{$this->uses[0]}->id = $id;
+		// Invalid id.
+		if (!$this->{$this->uses[0]}->exists())
+			throw new NotFoundException($this->_getMessage(ActionMessage::DATA_NOTFOUND));
+		// Delete data.
+		if ($this->{$this->uses[0]}->delete())
+			$this->_redirectWithFlash(null, ActionMessage::DELETE_COMPLETE);
+		else
+			$this->_redirectWithFlash(null, ActionMessage::DELETE_ERROR);
 	}
 
 	/**
@@ -82,6 +149,7 @@ class AppController extends Controller {
 	 *
 	 * @param string $identify message identify
 	 * @param string | array $args string to replaced
+	 * @return string action message
 	 * @access protected
 	 */
 	protected function _getMessage($identify, $args = array()) {
@@ -95,6 +163,7 @@ class AppController extends Controller {
 	 *
 	 * @param string $identify message identify
 	 * @param string | array $args string to replaced
+	 * @return void
 	 * @access protected
 	 */
 	protected function _setFlash($identify, $args = array()) {
@@ -102,49 +171,17 @@ class AppController extends Controller {
 	}
 
 	/**
-	 * edit method
+	 * Set flash message and redirect url
 	 *
-	 * @param string $id
+	 * @param string | array $url redirect url
+	 * @param string $identify message identify
+	 * @param string | array $args string to replace
 	 * @return void
-	 * @access public
-	 * @throws NotFoundException
-	 * @access public
+	 * @access protected
 	 */
-	public function edit($id = null) {
-		$this->{$this->uses[0]}->id = $id;
-		if (!$this->{$this->uses[0]}->exists())
-			throw new NotFoundException($this->_getMessage(ActionMessage::DATA_NOTFOUND));
-		if ($this->request->is('post') || $this->request->is('put')) {
-			if ($this->{$this->uses[0]}->save($this->request->data)) {
-				$this->Session->setFlash($this->_getMessage(ActionMessage::EDIT_COMPLETE));
-				$this->redirect(array('action' => 'index'));
-			} else {
-				$this->Session->setFlash($this->_getMessage(ActionMessage::EDIT_ERROR));
-			}
-		} else {
-			$this->request->data = $this->{$this->uses[0]}->read(null, $id);
-		}
-	}
-
-	/**
-	 * delete method
-	 *
-	 * @param string $id
-	 * @return void
-	 * @access public
-	 * @throws MethodNotAllowedException
-	 * @access public
-	 */
-	public function delete($id = null) {
-		if (!$this->request->is('post'))
-			throw new MethodNotAllowedException();
-		$this->{$this->uses[0]}->id = $id;
-		if (!$this->{$this->uses[0]}->exists())
-			throw new NotFoundException($this->_getMessage(ActionMessage::DATA_NOTFOUND));
-		if ($this->{$this->uses[0]}->delete())
-			$this->Session->setFlash($this->_getMessage(ActionMessage::DELETE_COMPLETE));
-		else
-			$this->Session->setFlash($this->_getMessage(ActionMessage::DELETE_ERROR));
-		$this->redirect(array('action' => 'index'));
+	protected function _redirectWithFlash($url = null, $identify, $args = array()) {
+		if (empty($url)) $url = array('action' => 'index');
+		$this->_setFlash($identify, $args);
+		$this->redirect($url);
 	}
 }
